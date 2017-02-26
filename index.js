@@ -5,7 +5,7 @@ const flatten = require("object-iron");
 function fillForm(data, fillablePDF, callback) {
 	var fdfData = generateXFDF(data);
 
-	var child = spawn('pdftk', [fillablePDF, 'fill_form', '-', 'output', 'a   ', 'flatten']);
+	var child = spawn('pdftk', [fillablePDF, 'fill_form', '-', 'output', '-', 'flatten']);
 
 	var chunks = []; // Pipe FDF generated data to process' stdin 
 	var err_chunks = [];
@@ -96,5 +96,7 @@ fillForm(inputJSON, __dirname + '/demo_files/ctest.pdf', function(err, code, res
 	console.log(err.toString('ascii'));
 	console.log(code);
 	console.log(res.toString('ascii'));
+
+	fs.writeFile("Test.pdf", res);
 });
 
