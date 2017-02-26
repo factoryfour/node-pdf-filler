@@ -2,6 +2,32 @@ const spawn = require('child_process').spawn;
 const fs = require('fs');
 const flatten = require("object-iron");
 
+function fillForm(data, fillablePDF, callback) {
+	var fdfData = generateXFDF(data);
+
+	var child = spawn('pdftk', [fillablePDF, 'fill_form', '-', 'output', 'a   ', 'flatten']);
+
+	var chunks = []; // Pipe FDF generated data to process' stdin 
+	var err_chunks = [];
+	child.stdin.write(Buffer.from(fdfData,'utf-8'));
+	child.stdin.end();
+	child.on('err', function(err) {
+		return callback(err);
+	});
+	child.stderr.on('data', function(data) {
+		err_chunks.push(data)
+	});
+	child.stdout.on('data', function(data) {
+		console.log(data.toString('ascii'));
+		console.log("===============================")
+		chunks.push(data);
+	});
+	child.on('exit', function(code) {
+		return callback(err_chunks, code, Buffer.concat(chunks));
+	});
+
+}
+
 function runCommand(callback) {
 	// var fdfData = fdf.generate(jsonData);
 	// var child = spawn('pdftk', [pdfFormPath, 'fill_form', '-', 'output', '-   ', 'flatten']);
@@ -55,3 +81,20 @@ function generateXFDF(data) {
 
 //invoking
 parseFields()
+
+var inputJSON = {
+	Text1: "Billy",
+	Group3: "Choice1",
+	CheckBox2: "Yes",
+	Group4: "Choice2",
+	CheckBox3: "Yes",
+	"Check Box4": "Off",	
+	Group5: "Choice1"
+}
+
+fillForm(inputJSON, __dirname + '/demo_files/ctest.pdf', function(err, code, res) {
+	console.log(err.toString('ascii'));
+	console.log(code);
+	console.log(res.toString('ascii'));
+});
+
