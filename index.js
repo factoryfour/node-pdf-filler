@@ -2,7 +2,7 @@ const spawn = require('child_process').spawn;
 const fs = require('fs');
 const flatten = require("object-iron");
 
-function fillForm(data, fillablePDF, callback) {
+module.exports.fillForm = function(data, fillablePDF, callback) {
 	var fdfData = generateXFDF(data);
 
 	var child = spawn('pdftk', [fillablePDF, 'fill_form', '-', 'output', '-', 'flatten']);
@@ -28,42 +28,6 @@ function fillForm(data, fillablePDF, callback) {
 
 }
 
-function runCommand(callback) {
-	// var fdfData = fdf.generate(jsonData);
-	// var child = spawn('pdftk', [pdfFormPath, 'fill_form', '-', 'output', '-   ', 'flatten']);
-	var child = spawn('pdftk', [__dirname + '/demo_files/ctest.pdf', 'dump_data_fields']);
-
-	var chunks = []; // Pipe FDF generated data to process' stdin 
-	var err_chunks = [];
-	// child.stdin.write(fdfData);
-	child.stdin.end();
-	child.on('err', function(err) {
-		return callback(err);
-	});
-	child.stderr.on('data', function(data) {
-		err_chunks.push(data)
-	});
-	child.stdout.on('data', function(data) {
-		console.log(data.toString('ascii'));
-		console.log("===============================")
-		chunks.push(data);
-	});
-	child.on('exit', function(code) {
-		return callback(err_chunks, code, Buffer.concat(chunks));
-	});
-}
-
-function parseFields(callback) {
-
-	runCommand(function(err, code, success) {
-		console.log(err);
-		console.log(err.toString('ascii'))
-		console.log(code);
-		// console.log(success.toString('ascii'));
-
-	});
-}
-
 function generateXFDF(data) {
     var field, form, header, val;
     form = flatten(data);
@@ -79,7 +43,8 @@ function generateXFDF(data) {
     return data;
   };
 
-//invoking
+/*
+//Example running of fillForm:
 parseFields()
 
 var inputJSON = {
@@ -99,4 +64,4 @@ fillForm(inputJSON, __dirname + '/demo_files/ctest.pdf', function(err, code, res
 
 	fs.writeFile("Test.pdf", res);
 });
-
+*/
