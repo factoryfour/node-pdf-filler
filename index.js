@@ -21,7 +21,7 @@ module.exports.fillForm = (data, fillablePDF, callback) => {
 	child.stdin.write(Buffer.from(fdfData, 'utf-8'));
 	child.stdin.end();
 	child.on('err', err => callback(err));
-	child.stderr.on('data', errChunk => errChunks.push(errChunk));
+	// child.stderr.on('data', errChunk => errChunks.push(errChunk));
 	child.stdout.on('data', (chunk) => {
 		console.log(chunk.toString('ascii'));
 		console.log('===============================');
