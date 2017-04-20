@@ -17,17 +17,11 @@ module.exports.fillForm = (data, fillablePDF, callback) => {
 	const fdfData = generateXFDF(data);
 	const child = spawn('pdftk', [fillablePDF, 'fill_form', '-', 'output', '-', 'flatten']);
 	const chunks = []; // Pipe FDF generated data to process' stdin
-	const errChunks = [];
 	child.stdin.write(Buffer.from(fdfData, 'utf-8'));
 	child.stdin.end();
 	child.on('err', err => callback(err));
-	child.stderr.on('data', errChunk => errChunks.push(errChunk));
-	child.stdout.on('data', (chunk) => {
-		console.log(chunk.toString('ascii'));
-		console.log('===============================');
-		chunks.push(chunk);
-	});
-	child.on('exit', code => callback(errChunks, code, Buffer.concat(chunks)));
+	child.stdout.on('data', chunk => chunks.push(chunk));
+	child.on('exit', code => callback(code, Buffer.concat(chunks)));
 };
 
 /*
